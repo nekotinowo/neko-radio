@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEKO.FM — Онлайн-радио: D'n'B, Lo-Fi, Synthwave</title>
+    <meta name="description" content="Бесплатное онлайн-радио без рекламы: Drum & Bass, Lo-Fi, Chill-Out, Synthwave и Phonk.">
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="mesh-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-shell">
+        <header class="top-bar">
+            <div class="brand">
+                <span class="brand-dot" id="liveDot"></span>
+                <span>NEKO.FM</span>
+            </div>
+            <div class="status-pill" id="statusBadge">OFFLINE // READY</div>
+            <div class="header-actions">
+                <button class="pill-btn" id="sleepBtn" title="Таймер сна">⏱ Сон: Выкл</button>
+                <button class="pill-btn" id="shareBtn" title="Скопировать ссылку">🔗 Поделиться</button>
+            </div>
+        </header>
+
+        <main class="main-grid">
+            <section class="hero-stage">
+                <div class="genre-tag" id="stationTag">AMBIENT // DOWNTEMPO</div>
+                <h1 class="station-title" id="stationTitle">Record Chill-Out</h1>
+                <p class="station-subtitle" id="stationDesc">Глубокий эмбиент и расслабляющая электроника без резких перепадов.</p>
+
+                <div class="visualizer-box">
+                    <canvas id="waveCanvas"></canvas>
+                </div>
+
+                <div class="controls-dock">
+                    <div class="transport-buttons">
+                        <button class="icon-btn" id="prevBtn" title="Предыдущая (←)">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                        </button>
+                        <button class="play-btn" id="playBtn" title="Пуск / Пауза (Пробел)">
+                            <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            <svg id="iconPause" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button class="icon-btn" id="nextBtn" title="Следующая (→)">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                        </button>
+                        <button class="icon-btn" id="favCurrentBtn" title="В избранное">♡</button>
+                    </div>
+
+                    <div class="volume-control">
+                        <button class="icon-btn small" id="muteBtn" title="Звук (M)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                            </svg>
+                        </button>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+                    </div>
+                </div>
+                <div class="hotkeys-hint">Управление: <span>Пробел</span> — пауза, <span>← / →</span> — волны, <span>M</span> — без звука</div>
+            </section>
+
+            <aside class="channels-panel">
+                <div class="panel-header">
+                    <span>ЭФИРНЫЕ КАНАЛЫ</span>
+                    <span class="mono" id="channelCount">11 STATIONS</span>
+                </div>
+
+                <div class="filter-controls">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Поиск волны...">
+                    <div class="genre-tabs" id="genreTabs">
+                        <button class="tab-btn active" data-filter="all">Все</button>
+                        <button class="tab-btn" data-filter="fav">♥ Избранное</button>
+                        <button class="tab-btn" data-filter="dnb">D'n'B</button>
+                        <button class="tab-btn" data-filter="chill">Lo-Fi / Chill</button>
+                        <button class="tab-btn" data-filter="synth">Synth / Phonk</button>
+                        <button class="tab-btn" data-filter="club">Club / Trance</button>
+                    </div>
+                </div>
+
+                <div class="channels-list" id="channelsList"></div>
+            </aside>
+        </main>
+    </div>
+
+    <audio id="audioStream" preload="none"></audio>
+    <script src="script.js"></script>
+</body>
+</html>
