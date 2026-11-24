@@ -8,9 +8,17 @@ const stations = [
     { name: "Record Neurofunk", category: "dnb", tag: "NEUROFUNK // BASS", desc: "Техничный нейрофанк с мощным саб-басом.", url: HOST + "neurofunk96.aacp", colors: ["rgba(190, 18, 60, 0.45)", "rgba(109, 40, 217, 0.4)", "rgba(220, 38, 38, 0.35)"] },
     { name: "Record Jungle", category: "dnb", tag: "JUNGLE // BREAKBEAT", desc: "Олдскульный джангл и скоростные брейки.", url: HOST + "jungle96.aacp", colors: ["rgba(21, 128, 61, 0.45)", "rgba(202, 138, 4, 0.4)", "rgba(15, 118, 110, 0.35)"] },
     { name: "Record Synthwave", category: "synth", tag: "RETROWAVE // 80s", desc: "Неоновые трассы 80-х и аналоговые синтезаторы.", url: HOST + "synth96.aacp", colors: ["rgba(192, 38, 211, 0.45)", "rgba(79, 70, 229, 0.4)", "rgba(236, 72, 153, 0.35)"] },
-    { name: "Record Phonk", category: "synth", tag: "DRIFT PHONK // 808", desc: "Перегруженный 808-й бас и ночной дрифт-фонк.", url: HOST + "phonk96.aacp", colors: ["rgba(159, 18, 57, 0.45)", "rgba(88, 28, 135, 0.4)", "rgba(30, 27, 75, 0.45)"] },
+    { name: "Record Phonk", category: "phonk", tag: "DRIFT PHONK // 808", desc: "Перегруженный 808-й бас и ночной дрифт-фонк.", url: HOST + "phonk96.aacp", colors: ["rgba(159, 18, 57, 0.45)", "rgba(88, 28, 135, 0.4)", "rgba(30, 27, 75, 0.45)"] },
     { name: "Record Trancemission", category: "club", tag: "UPLIFTING TRANCE", desc: "Эйфорический транс и космические мелодии.", url: HOST + "tm96.aacp", colors: ["rgba(29, 78, 216, 0.45)", "rgba(6, 182, 212, 0.4)", "rgba(124, 58, 237, 0.35)"] },
-    { name: "Radio Record Main", category: "club", tag: "DANCE MAIN", desc: "Главный танцевальный эфир страны 24/7.", url: HOST + "rr_main96.aacp", colors: ["rgba(225, 29, 72, 0.45)", "rgba(234, 88, 12, 0.4)", "rgba(124, 58, 237, 0.35)"] }
+    { name: "Radio Record Main", category: "club", tag: "DANCE MAIN", desc: "Главный танцевальный эфир страны 24/7.", url: HOST + "rr_main96.aacp", colors: ["rgba(225, 29, 72, 0.45)", "rgba(234, 88, 12, 0.4)", "rgba(124, 58, 237, 0.35)"] },
+    { name: "Record Trap", category: "bass", tag: "TRAP // 808", desc: "Тяжёлый трэп и бас-музыка.", url: HOST + "trap96.aacp", colors: ["rgba(88, 28, 135, 0.5)", "rgba(220, 38, 38, 0.4)", "rgba(30, 27, 75, 0.45)"] },
+    { name: "Record Techno", category: "club", tag: "PEAK TECHNO", desc: "Плотный ночной техно.", url: HOST + "techno96.aacp", colors: ["rgba(15, 23, 42, 0.5)", "rgba(37, 99, 235, 0.4)", "rgba(14, 165, 233, 0.35)"] },
+    { name: "Record Club", category: "club", tag: "CLUB DANCE", desc: "Клубный мейнстрим-хаус.", url: HOST + "club96.aacp", colors: ["rgba(236, 72, 153, 0.45)", "rgba(59, 130, 246, 0.4)", "rgba(168, 85, 247, 0.35)"] },
+    { name: "Record Tech House", category: "club", tag: "TECH HOUSE", desc: "Драйвовый тек-хаус для танцпола.", url: HOST + "techouse96.aacp", colors: ["rgba(20, 184, 166, 0.45)", "rgba(245, 158, 11, 0.4)", "rgba(6, 95, 70, 0.4)"] },
+    { name: "Record Rock", category: "rock", tag: "ROCK", desc: "Рок-хиты и гитарный драйв.", url: HOST + "rock96.aacp", colors: ["rgba(185, 28, 28, 0.45)", "rgba(71, 85, 105, 0.4)", "rgba(30, 41, 59, 0.45)"] },
+    { name: "Record Rap", category: "rap", tag: "RAP // HIP-HOP", desc: "Рэп и хип-хоп 24/7.", url: HOST + "rap96.aacp", colors: ["rgba(217, 119, 6, 0.45)", "rgba(30, 27, 75, 0.4)", "rgba(120, 53, 15, 0.4)"] },
+    { name: "Record Gold", category: "gold", tag: "GOLD // OLDIES", desc: "Золотые хиты прошлых лет.", url: HOST + "gold96.aacp", colors: ["rgba(245, 158, 11, 0.45)", "rgba(234, 179, 8, 0.4)", "rgba(180, 83, 9, 0.35)"] },
+    { name: "Record Goa", category: "goa", tag: "GOA // PSYTRANCE", desc: "Гоа-транс и психоделика.", url: HOST + "goa96.aacp", colors: ["rgba(22, 163, 74, 0.45)", "rgba(147, 51, 234, 0.4)", "rgba(16, 185, 129, 0.35)"] }
 ];
 
 let currentIdx = Number(localStorage.getItem('neko_idx')) || 0;

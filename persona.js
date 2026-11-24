@@ -68,19 +68,32 @@ function formatTime(sec) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
+function shortenTitle(title, maxLen = 48) {
+    const clean = String(title || '').replace(/\s+/g, ' ').trim();
+    if (clean.length <= maxLen) return clean;
+    const cut = clean.slice(0, maxLen);
+    const lastSpace = cut.lastIndexOf(' ');
+    const base = lastSpace > Math.floor(maxLen * 0.6) ? cut.slice(0, lastSpace) : cut;
+    return base.replace(/[,\s._\-:;]+$/, '') + '…';
+}
+
 async function loadPersonaCatalog() {
     statusBadge.textContent = "SEARCHING OST...";
     const loaded = [];
+    const seenUrls = new Set();
     const ARCHIVE_HOST = ["https://", "archive.", "org/"].join("");
+    const TRACK_LIMIT = 250;
 
     for (const src of GAME_QUERIES) {
+        if (loaded.length >= TRACK_LIMIT) break;
         try {
-            const searchUrl = `${ARCHIVE_HOST}advancedsearch.php?q=${encodeURIComponent(src.q)}&fl[]=identifier&sort[]=downloads+desc&rows=2&output=json`;
+            const searchUrl = `${ARCHIVE_HOST}advancedsearch.php?q=${encodeURIComponent(src.q)}&fl[]=identifier&sort[]=downloads+desc&rows=15&output=json`;
             const sRes = await fetch(searchUrl);
             const sData = await sRes.json();
             const docs = (sData.response && sData.response.docs) || [];
 
             for (const doc of docs) {
+                if (loaded.length >= TRACK_LIMIT) break;
                 const mRes = await fetch(`${ARCHIVE_HOST}metadata/${doc.identifier}`);
                 const mData = await mRes.json();
                 if (!mData || !mData.files) continue;
@@ -88,18 +101,22 @@ async function loadPersonaCatalog() {
                 const mp3s = mData.files.filter(f => f.name && f.name.toLowerCase().endsWith('.mp3'));
                 if (mp3s.length > 0) {
                     mp3s.forEach(file => {
+                        if (loaded.length >= TRACK_LIMIT) return;
+                        const url = `${ARCHIVE_HOST}download/${doc.identifier}/${encodeURIComponent(file.name)}`;
+                        if (seenUrls.has(url)) return;
+                        seenUrls.add(url);
+
                         const cleanName = (file.title || file.name)
                             .replace(/\.mp3$/i, '')
                             .replace(/^\d+[\s._-]+/, '')
                             .replace(/_/g, ' ');
                         loaded.push({
-                            title: cleanName,
+                            title: shortenTitle(cleanName),
                             game: src.game,
                             label: src.label,
-                            url: `${ARCHIVE_HOST}download/${doc.identifier}/${encodeURIComponent(file.name)}`
+                            url
                         });
                     });
-                    break;
                 }
             }
         } catch (e) {
@@ -274,3 +291,37 @@ requestAnimationFrame(animateWave);
 }
 animateWave();
 loadPersonaCatalog();
+
+const brandLogo = document.querySelector('.brand');
+if (brandLogo) {
+    brandLogo.style.cursor = 'pointer';
+    brandLogo.addEventListener('click', () => {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const actx = new AudioCtx();
+            const osc = actx.createOscillator();
+            const gain = actx.createGain();
+            osc.type = 'triangle';
+            const now = actx.currentTime;
+            osc.frequency.setValueAtTime(380, now);
+            osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.45);
+            gain.gain.setValueAtTime(0.01, now);
+            gain.gain.linearRampToValueAtTime(0.28, now + 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+            osc.connect(gain);
+            gain.connect(actx.destination);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } catch (e) {}
+        const textSpan = brandLogo.querySelector('span:last-child');
+        const oldText = textSpan.textContent;
+        textSpan.textContent = 'NYA! 🐾';
+        brandLogo.style.transform = 'scale(1.12) rotate(-3deg)';
+        brandLogo.style.transition = 'transform 0.18s ease';
+        setTimeout(() => {
+            textSpan.textContent = oldText;
+            brandLogo.style.transform = 'scale(1) rotate(0deg)';
+        }, 550);
+    });
+}

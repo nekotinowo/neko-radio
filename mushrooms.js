@@ -86,6 +86,36 @@ function formatTime(sec) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
+const TRACK_PODCAST_HINTS = [
+    'podcast', 'episode', 'interview', 'audiobook', 'audio book',
+    'read by', 'librivox', 'spoken word', 'radio show', 'talk show',
+    'narration', 'voiceover', 'voice over',
+    'подкаст', 'эпизод', 'аудиокнига', 'интервью', 'радиошоу'
+];
+
+const SUBJECT_PODCAST_HINTS = ['podcast', 'librivox', 'audiobook', 'подкаст', 'аудиокнига'];
+
+function looksLikePodcast(file, mData) {
+    const meta = (mData && mData.metadata) || {};
+    const subject = Array.isArray(meta.subject) ? meta.subject : (meta.subject ? [meta.subject] : []);
+
+    const trackText = [file.name || '', file.title || ''].join(' ').toLowerCase();
+    if (TRACK_PODCAST_HINTS.some(h => trackText.includes(h))) return true;
+
+    // description/title элемента шумные — по ним эмбиент вырезался зря, поэтому только subject
+    const subjectText = subject.map(s => String(s).toLowerCase()).join(' ');
+    return SUBJECT_PODCAST_HINTS.some(h => subjectText.includes(h));
+}
+
+function shortenTitle(title, maxLen = 48) {
+    const clean = String(title || '').replace(/\s+/g, ' ').trim();
+    if (clean.length <= maxLen) return clean;
+    const cut = clean.slice(0, maxLen);
+    const lastSpace = cut.lastIndexOf(' ');
+    const base = lastSpace > Math.floor(maxLen * 0.6) ? cut.slice(0, lastSpace) : cut;
+    return base.replace(/[,\s._\-:;]+$/, '') + '…';
+}
+
 async function loadMyceliumCatalog() {
     statusBadge.textContent = "GROWING MYCELIUM...";
     const ARCHIVE_HOST = ["https://", "archive.", "org/"].join("");
@@ -93,7 +123,8 @@ async function loadMyceliumCatalog() {
 
     await Promise.all(SPORE_QUERIES.map(async (src) => {
         try {
-            const searchUrl = `${ARCHIVE_HOST}advancedsearch.php?q=${encodeURIComponent(src.q)}&fl[]=identifier&sort[]=downloads+desc&rows=4&output=json`;
+            const rows = src.spore === 'lionsmane' ? 8 : 4;
+            const searchUrl = `${ARCHIVE_HOST}advancedsearch.php?q=${encodeURIComponent(src.q)}&fl[]=identifier&sort[]=downloads+desc&rows=${rows}&output=json`;
             const sRes = await fetch(searchUrl);
             const sData = await sRes.json();
             const docs = (sData.response && sData.response.docs) || [];
@@ -106,8 +137,7 @@ async function loadMyceliumCatalog() {
 
                                         const mp3s = mData.files.filter(f => {
                         if (!f.name || !f.name.toLowerCase().endsWith('.mp3')) return false;
-                        const low = f.name.toLowerCase();
-                        if (low.includes('podcast') || low.includes('episode') || low.includes('interview') || low.includes('talk')) return false;
+                        if (looksLikePodcast(f, mData)) return false;
                         if (f.length && Number(f.length) > 900) return false;
                         return true;
                     }).slice(0, 10);
@@ -123,7 +153,7 @@ async function loadMyceliumCatalog() {
                             .replace(/_/g, ' ');
 
                         allTracks.push({
-                            title: cleanName,
+                            title: shortenTitle(cleanName),
                             spore: src.spore,
                             label: src.label,
                             desc: src.desc,
@@ -305,3 +335,37 @@ requestAnimationFrame(animateWave);
 }
 animateWave();
 loadMyceliumCatalog();
+
+const brandLogo = document.querySelector('.brand');
+if (brandLogo) {
+    brandLogo.style.cursor = 'pointer';
+    brandLogo.addEventListener('click', () => {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const actx = new AudioCtx();
+            const osc = actx.createOscillator();
+            const gain = actx.createGain();
+            osc.type = 'triangle';
+            const now = actx.currentTime;
+            osc.frequency.setValueAtTime(380, now);
+            osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.45);
+            gain.gain.setValueAtTime(0.01, now);
+            gain.gain.linearRampToValueAtTime(0.28, now + 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+            osc.connect(gain);
+            gain.connect(actx.destination);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } catch (e) {}
+        const textSpan = brandLogo.querySelector('span:last-child');
+        const oldText = textSpan.textContent;
+        textSpan.textContent = 'NYA! 🐾';
+        brandLogo.style.transform = 'scale(1.12) rotate(-3deg)';
+        brandLogo.style.transition = 'transform 0.18s ease';
+        setTimeout(() => {
+            textSpan.textContent = oldText;
+            brandLogo.style.transform = 'scale(1) rotate(0deg)';
+        }, 550);
+    });
+}

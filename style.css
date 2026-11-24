@@ -372,6 +372,13 @@ input[type="range"]::-webkit-slider-thumb {
     color: #fff;
 }
 
+.tab-icon {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+    font-size: 1em;
+    line-height: 1;
+    vertical-align: -0.08em;
+}
+
 .channels-list {
     display: flex;
     flex-direction: column;
