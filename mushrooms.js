@@ -123,7 +123,7 @@ async function loadMyceliumCatalog() {
 
     await Promise.all(SPORE_QUERIES.map(async (src) => {
         try {
-            const rows = src.spore === 'lionsmane' ? 8 : 4;
+            const rows = 8;
             const searchUrl = `${ARCHIVE_HOST}advancedsearch.php?q=${encodeURIComponent(src.q)}&fl[]=identifier&sort[]=downloads+desc&rows=${rows}&output=json`;
             const sRes = await fetch(searchUrl);
             const sData = await sRes.json();
@@ -177,8 +177,9 @@ async function loadMyceliumCatalog() {
         statusBadge.textContent = "ARCHIVE OFFLINE";
         document.getElementById('trackTitle').textContent = "Нет связи с грибницей";
     } else {
-        allTracks.sort(() => Math.random() - 0.5);
+        allTracks.sort((a, b) => a.title.localeCompare(b.title, 'ru', { sensitivity: 'base' }));
         applyFilters();
+        selectTrack(0, false);
         statusBadge.textContent = `ARCHIVE // ${allTracks.length} TRACKS`;
     }
 }
@@ -328,7 +329,10 @@ for (let x = 0; x <= width; x += 4) {
 const y = height / 2 + Math.sin(x * freq + phase * (j + 1) * 0.65) * amp * Math.sin((x / width) * Math.PI);
 x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
 }
+ctx.shadowColor = color;
+ctx.shadowBlur = 8;
 ctx.stroke();
+ctx.shadowBlur = 0;
 });
 phase += isPlaying ? 0.075 : 0.015;
 requestAnimationFrame(animateWave);
@@ -343,20 +347,41 @@ if (brandLogo) {
         try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             const actx = new AudioCtx();
-            const osc = actx.createOscillator();
-            const gain = actx.createGain();
-            osc.type = 'triangle';
             const now = actx.currentTime;
-            osc.frequency.setValueAtTime(380, now);
-            osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
-            osc.frequency.exponentialRampToValueAtTime(420, now + 0.45);
-            gain.gain.setValueAtTime(0.01, now);
-            gain.gain.linearRampToValueAtTime(0.28, now + 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
-            osc.connect(gain);
+
+            const osc = actx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(620, now + 0.16);
+            osc.frequency.exponentialRampToValueAtTime(340, now + 0.55);
+
+            const lfo = actx.createOscillator();
+            lfo.frequency.value = 6;
+            const lfoGain = actx.createGain();
+            lfoGain.gain.value = 14;
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+
+            const filter = actx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800, now);
+            filter.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
+            filter.frequency.exponentialRampToValueAtTime(700, now + 0.5);
+
+            const gain = actx.createGain();
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.linearRampToValueAtTime(0.3, now + 0.08);
+            gain.gain.setValueAtTime(0.3, now + 0.28);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+
+            osc.connect(filter);
+            filter.connect(gain);
             gain.connect(actx.destination);
+
             osc.start(now);
-            osc.stop(now + 0.5);
+            lfo.start(now);
+            osc.stop(now + 0.6);
+            lfo.stop(now + 0.6);
         } catch (e) {}
         const textSpan = brandLogo.querySelector('span:last-child');
         const oldText = textSpan.textContent;
