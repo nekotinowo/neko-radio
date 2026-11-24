@@ -4,9 +4,33 @@ const GAME_QUERIES = [
     { game: "p3", label: "PERSONA 3 OST", q: 'title:("Persona 3" AND ("Soundtrack" OR "OST")) AND mediatype:audio' }
 ];
 
+const GAME_THEMES = {
+    all: {
+        blobs: ["rgba(225, 29, 72, 0.5)", "rgba(37, 99, 235, 0.5)", "rgba(234, 179, 8, 0.35)"],
+        tagColor: "#fda4af", tagBg: "rgba(225, 29, 72, 0.2)", tagBorder: "rgba(225, 29, 72, 0.45)",
+        grad: "linear-gradient(90deg, #f43f5e, #3b82f6)", waveColor: "rgba(251, 113, 133, 0.55)"
+    },
+    p5: {
+        blobs: ["rgba(225, 29, 72, 0.6)", "rgba(159, 18, 57, 0.5)", "rgba(244, 63, 94, 0.4)"],
+        tagColor: "#fda4af", tagBg: "rgba(225, 29, 72, 0.25)", tagBorder: "rgba(225, 29, 72, 0.6)",
+        grad: "linear-gradient(90deg, #e11d48, #fb7185)", waveColor: "rgba(244, 63, 94, 0.6)"
+    },
+    p4: {
+        blobs: ["rgba(234, 179, 8, 0.52)", "rgba(202, 138, 4, 0.45)", "rgba(245, 158, 11, 0.38)"],
+        tagColor: "#fde047", tagBg: "rgba(234, 179, 8, 0.22)", tagBorder: "rgba(234, 179, 8, 0.55)",
+        grad: "linear-gradient(90deg, #eab308, #facc15)", waveColor: "rgba(250, 204, 21, 0.6)"
+    },
+    p3: {
+        blobs: ["rgba(37, 99, 235, 0.6)", "rgba(29, 78, 216, 0.5)", "rgba(6, 182, 212, 0.42)"],
+        tagColor: "#93c5fd", tagBg: "rgba(37, 99, 235, 0.25)", tagBorder: "rgba(37, 99, 235, 0.6)",
+        grad: "linear-gradient(90deg, #2563eb, #38bdf8)", waveColor: "rgba(56, 189, 248, 0.6)"
+    }
+};
+
 let allTracks = [], filteredTracks = [], currentIdx = 0;
 let isPlaying = false, isShuffle = true, currentGame = "all", searchQuery = "";
 let targetVolume = Number(localStorage.getItem('neko_vol')) || 0.8;
+let currentWaveColor = GAME_THEMES.all.waveColor;
 
 const audio = document.getElementById('audioStream');
 const playBtn = document.getElementById('playBtn');
@@ -21,6 +45,21 @@ const progressFill = document.getElementById('progressFill');
 
 audio.volume = targetVolume;
 volumeSlider.value = targetVolume;
+
+function applyGameTheme(gameKey) {
+    const t = GAME_THEMES[gameKey] || GAME_THEMES.all;
+    document.querySelector('.blob-1').style.background = `radial-gradient(circle, ${t.blobs} 0%, transparent 70%)`;
+    document.querySelector('.blob-2').style.background = `radial-gradient(circle, ${t.blobs} 0%, transparent 70%)`;
+    document.querySelector('.blob-3').style.background = `radial-gradient(circle, ${t.blobs} 0%, transparent 70%)`;
+    const tag = document.getElementById('gameTag');
+    tag.style.color = t.tagColor;
+    tag.style.background = t.tagBg;
+    tag.style.borderColor = t.tagBorder;
+    document.documentElement.style.setProperty('--p-accent-bg', t.tagBg);
+    document.documentElement.style.setProperty('--p-accent-border', t.tagBorder);
+    document.documentElement.style.setProperty('--p-grad', t.grad);
+    currentWaveColor = t.waveColor;
+}
 
 function formatTime(sec) {
     if (!sec || isNaN(sec)) return "0:00";
@@ -71,7 +110,7 @@ async function loadPersonaCatalog() {
     if (loaded.length === 0) {
         statusBadge.textContent = "NO CONNECTION";
         document.getElementById('trackTitle').textContent = "Archive.org недоступен";
-        document.getElementById('albumDesc').textContent = "Провайдер блокирует соединение с сервером архива. Включите VPN или загрузите свои MP3 в папку music/.";
+        document.getElementById('albumDesc').textContent = "Провайдер блокирует соединение с сервером архива. Включите VPN или загрузите свои MP3.";
         return;
     }
 
@@ -110,6 +149,7 @@ function selectTrack(idx, autoPlay = true) {
     document.getElementById('trackTitle').textContent = track.title;
     document.getElementById('gameTag').textContent = track.label;
     document.getElementById('albumDesc').textContent = "Atlus Sound Team — Shoji Meguro & Lyn";
+    applyGameTheme(track.game);
     progressFill.style.width = "0%";
     renderTracks();
 
@@ -200,41 +240,37 @@ document.getElementById('muteBtn').addEventListener('click', () => {
 
 document.getElementById('gameTabs').addEventListener('click', e => {
     if (!e.target.classList.contains('tab-btn')) return;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    currentGame = e.target.dataset.game;
-    currentIdx = 0;
-    applyFilters();
+document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+e.target.classList.add('active');
+currentGame = e.target.dataset.game;
+currentIdx = 0;
+applyGameTheme(currentGame);
+applyFilters();
 });
-
 document.getElementById('searchInput').addEventListener('input', e => {
-    searchQuery = e.target.value.trim().toLowerCase();
-    currentIdx = 0;
-    applyFilters();
+searchQuery = e.target.value.trim().toLowerCase();
+currentIdx = 0;
+applyFilters();
 });
-
 const canvas = document.getElementById('waveCanvas'), ctx = canvas.getContext('2d');
 let phase = 0, width = 0, height = 0, currentAmp = 2;
 function resizeCanvas() { width = canvas.width = canvas.offsetWidth; height = canvas.height = canvas.offsetHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-
 function animateWave() {
-    ctx.clearRect(0, 0, width, height);
-    const pulse = isPlaying ? (Math.sin(phase * 2.1) * 0.4 + Math.cos(phase * 3.4) * 0.25 + 0.8) : 0;
-    currentAmp += ((isPlaying ? (10 + pulse * 26) : 2) - currentAmp) * 0.14;
-
-    [[currentAmp, 0.015, 'rgba(255,255,255,0.9)', 2.5], [currentAmp * 0.7, 0.023, 'rgba(251,113,133,0.55)', 1.7], [currentAmp * 0.5, 0.032, 'rgba(96,165,250,0.45)', 1.4]].forEach(([amp, freq, color, lw], j) => {
-        ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = lw;
-        for (let x = 0; x <= width; x += 4) {
-            const y = height / 2 + Math.sin(x * freq + phase * (j + 1) * 0.65) * amp * Math.sin((x / width) * Math.PI);
-            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-    });
-    phase += isPlaying ? 0.075 : 0.015;
-    requestAnimationFrame(animateWave);
+ctx.clearRect(0, 0, width, height);
+const pulse = isPlaying ? (Math.sin(phase * 2.1) * 0.4 + Math.cos(phase * 3.4) * 0.25 + 0.8) : 0;
+currentAmp += ((isPlaying ? (10 + pulse * 26) : 2) - currentAmp) * 0.14;
+[[currentAmp, 0.015, 'rgba(255,255,255,0.9)', 2.5], [currentAmp * 0.7, 0.023, currentWaveColor, 1.7], [currentAmp * 0.5, 0.032, 'rgba(255,255,255,0.35)', 1.4]].forEach(([amp, freq, color, lw], j) => {
+ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = lw;
+for (let x = 0; x <= width; x += 4) {
+const y = height / 2 + Math.sin(x * freq + phase * (j + 1) * 0.65) * amp * Math.sin((x / width) * Math.PI);
+x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
 }
-
+ctx.stroke();
+});
+phase += isPlaying ? 0.075 : 0.015;
+requestAnimationFrame(animateWave);
+}
 animateWave();
 loadPersonaCatalog();

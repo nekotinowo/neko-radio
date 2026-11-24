@@ -9,11 +9,12 @@
     <link href="https://googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        .blob-1 { background: radial-gradient(circle, rgba(225, 29, 72, 0.55) 0%, transparent 70%) !important; }
-        .blob-2 { background: radial-gradient(circle, rgba(30, 58, 138, 0.55) 0%, transparent 70%) !important; }
-        .blob-3 { background: radial-gradient(circle, rgba(159, 18, 57, 0.45) 0%, transparent 70%) !important; }
-        .genre-tag { color: #fda4af; background: rgba(225, 29, 72, 0.2); border-color: rgba(225, 29, 72, 0.45); }
-        .tab-btn.active { background: rgba(225, 29, 72, 0.35); border-color: rgba(225, 29, 72, 0.7); }
+        .blob-1 { background: radial-gradient(circle, rgba(225, 29, 72, 0.55) 0%, transparent 70%); }
+        .blob-2 { background: radial-gradient(circle, rgba(30, 58, 138, 0.55) 0%, transparent 70%); }
+        .blob-3 { background: radial-gradient(circle, rgba(159, 18, 57, 0.45) 0%, transparent 70%); }
+        .genre-tag { transition: all 0.5s ease; }
+        .tab-btn.active { background: var(--p-accent-bg, rgba(225, 29, 72, 0.35)); border-color: var(--p-accent-border, rgba(225, 29, 72, 0.7)); }
+        .progress-fill { height: 100%; width: 0%; background: var(--p-grad, linear-gradient(90deg, #f43f5e, #fb7185)); transition: width 0.15s linear, background 0.5s ease; }
         .progress-wrap { width: 100%; margin-bottom: 1.25rem; }
         .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.12); border-radius: 99px; overflow: hidden; cursor: pointer; }
         .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f43f5e, #fb7185); transition: width 0.15s linear; }
