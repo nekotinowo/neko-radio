@@ -222,3 +222,41 @@ requestAnimationFrame(animateWave);
 updateUIStation(currentIdx);
 renderChannels();
 animateWave();
+const brandLogo = document.querySelector('.brand');
+if (brandLogo) {
+    brandLogo.style.cursor = 'pointer';
+    brandLogo.addEventListener('click', () => {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'triangle';
+            const now = ctx.currentTime;
+
+            osc.frequency.setValueAtTime(380, now);
+            osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.45);
+
+            gain.gain.setValueAtTime(0.01, now);
+            gain.gain.linearRampToValueAtTime(0.28, now + 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } catch (e) {}
+        const textSpan = brandLogo.querySelector('span:last-child');
+        const oldText = textSpan.textContent;
+        textSpan.textContent = 'NYA! 🐾';
+        brandLogo.style.transform = 'scale(1.12) rotate(-3deg)';
+        brandLogo.style.transition = 'transform 0.18s ease';
+
+        setTimeout(() => {
+            textSpan.textContent = oldText;
+            brandLogo.style.transform = 'scale(1) rotate(0deg)';
+        }, 550);
+    });
+}
