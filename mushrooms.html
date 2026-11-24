@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEKO.FM // Mycelium & Psybient Archive</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .blob-1 { background: radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, transparent 70%); }
+        .blob-2 { background: radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, transparent 70%); }
+        .blob-3 { background: radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, transparent 70%); }
+        .genre-tag { transition: all 0.5s ease; }
+        .tab-btn.active { background: var(--m-accent-bg, rgba(16, 185, 129, 0.35)); border-color: var(--m-accent-border, rgba(16, 185, 129, 0.7)); }
+        .progress-wrap { width: 100%; margin-bottom: 1.25rem; }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.12); border-radius: 99px; overflow: hidden; cursor: pointer; }
+        .progress-fill { height: 100%; width: 0%; background: var(--m-grad, linear-gradient(90deg, #10b981, #8b5cf6)); transition: width 0.15s linear, background 0.5s ease; }
+        .time-row { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; }
+    </style>
+</head>
+<body>
+    <div class="mesh-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-shell">
+        <header class="top-bar">
+            <div class="brand">
+                <span class="brand-dot" id="liveDot"></span>
+                <span>NEKO // MYCELIUM</span>
+            </div>
+            <div class="status-pill" id="statusBadge">SPORES // LOADING</div>
+            <div class="header-actions">
+                <a href="index.html" class="pill-btn" style="text-decoration:none;">📻 Назад к радио</a>
+                <button class="pill-btn" id="shuffleBtn">🔀 Shuffle: Вкл</button>
+            </div>
+        </header>
+
+        <main class="main-grid">
+            <section class="hero-stage">
+                <div class="genre-tag" id="sporeTag">PSYCHEDELIC & FOREST SOUND</div>
+                <h1 class="station-title" id="trackTitle">Поиск споровых волн...</h1>
+                <p class="station-subtitle" id="sporeDesc">Psybient, Forest Psytrance, лесной эмбиент и глубокий даунтемпо.</p>
+
+                <div class="visualizer-box">
+                    <canvas id="waveCanvas"></canvas>
+                </div>
+
+                <div class="progress-wrap">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time-row">
+                        <span id="curTime">0:00</span>
+                        <span id="durTime">0:00</span>
+                    </div>
+                </div>
+
+                <div class="controls-dock">
+                    <div class="transport-buttons">
+                        <button class="icon-btn" id="prevBtn" title="Предыдущий трек">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                        </button>
+                        <button class="play-btn" id="playBtn" title="Пуск / Пауза">
+                            <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            <svg id="iconPause" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button class="icon-btn" id="nextBtn" title="Следующий трек">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="volume-control">
+                        <button class="icon-btn small" id="muteBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                            </svg>
+                        </button>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+                    </div>
+                </div>
+            </section>
+
+            <aside class="channels-panel">
+                <div class="panel-header">
+                    <span>ГРИБНОЙ АРХИВ</span>
+                    <span class="mono" id="trackCount">0 TRACKS</span>
+                </div>
+
+                <div class="filter-controls">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Поиск трека (Shpongle, Forest, Dub...)">
+                    <div class="genre-tabs" id="sporeTabs">
+                        <button class="tab-btn active" data-spore="all">Все виды</button>
+                        <button class="tab-btn" data-spore="amanita">🍄 Мухомор</button>
+                        <button class="tab-btn" data-spore="psilocybe">✨ Псилоцибин</button>
+                        <button class="tab-btn" data-spore="chanterelle">🌲 Лисички</button>
+                        <button class="tab-btn" data-spore="lionsmane">🧬 Ежовик</button>
+                    </div>
+                </div>
+
+                <div class="channels-list" id="tracksList"></div>
+            </aside>
+        </main>
+    </div>
+
+    <audio id="audioStream" preload="none"></audio>
+    <script src="mushrooms.js"></script>
+</body>
+</html>
